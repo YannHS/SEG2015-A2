@@ -4,6 +4,9 @@ package edu.seg2105.edu.server.backend;
 // license found at www.lloseng.com 
 
 
+import java.io.IOException;
+
+import edu.seg2105.client.common.ChatIF;
 import ocsf.server.*;
 
 /**
@@ -24,6 +27,16 @@ public class EchoServer extends AbstractServer
    */
   final public static int DEFAULT_PORT = 5555;
   
+  
+  //Instance variables **********************************************
+  
+  /**
+   * The interface type variable.  It allows the implementation of 
+   * the display method in the client.
+   */
+  ChatIF serverUI; 
+  
+  
   //Constructors ****************************************************
   
   /**
@@ -31,9 +44,18 @@ public class EchoServer extends AbstractServer
    *
    * @param port The port number to connect on.
    */
-  public EchoServer(int port) 
+  public EchoServer(int port, ChatIF serverUI) throws IOException
   {
     super(port);
+    this.serverUI = serverUI;
+    try 
+    {
+      this.listen(); //Start listening for connections
+    } 
+    catch (Exception ex) 
+    {
+      serverUI.display("ERROR - Could not listen for clients!");
+    }
   }
 
   
@@ -78,39 +100,81 @@ public class EchoServer extends AbstractServer
       (client.getName() + " has disconnected.");
   }
   
+  public void handleMessageFromServerUI(String message) throws IOException {
+	  
+	// Check if the message is a command
+		if (message.startsWith("#")) {
+			// this is a command
+			switch(message.split(" ")[0]) {
+			case "#quit":
+				quit();
+				break;
+			case "#stop":
+				stopListening();
+				break;
+			
+			case "#close":
+				close();
+				break;
+				
+			case "#start":
+				if (! this.isListening()) {
+					listen();
+				} else {
+					serverUI.display("Server already started.");
+				}
+				break;
+								
+			case "#getport":
+				serverUI.display(String.valueOf(this.getPort()));
+				break;
+				
+			case "#setport":
+				if (! this.isListening()) {
+					try {
+						this.setPort(Integer.parseInt(message.split(" ")[1]));
+						serverUI.display("Port set to " + this.getPort());
+					}
+					catch (IndexOutOfBoundsException e) {
+						serverUI.display("Port number needed.");
+					}				
+				} else {
+					serverUI.display("Cannot change port when logged in.");
+				}
+				break;
+							
+			default:
+				serverUI.display("Invalid command.");
+			}
+		} else {  
+			// message is not a command, broadcast it to the clients
+			try
+		    {
+		      sendToAllClients("SERVER MSG> " + message);
+		      serverUI.display
+		        (message);
+		    }
+		    catch(Exception e)
+		    {
+		    	serverUI.display
+		        ("Could not send message to clients.");
+	    }
+		}
+  }
+  
+  public void quit()
+  {
+    try
+    {
+      stopListening();
+    }
+    catch(Exception e) {}
+    System.exit(0);
+  }
+  
   
   //Class methods ***************************************************
   
-  /**
-   * This method is responsible for the creation of 
-   * the server instance (there is no UI in this phase).
-   *
-   * @param args[0] The port number to listen on.  Defaults to 5555 
-   *          if no argument is entered.
-   */
-  public static void main(String[] args) 
-  {
-    int port = 0; //Port to listen on
-
-    try
-    {
-      port = Integer.parseInt(args[0]); //Get port from command line
-    }
-    catch(Throwable t)
-    {
-      port = DEFAULT_PORT; //Set port to 5555
-    }
-	
-    EchoServer sv = new EchoServer(port);
-    
-    try 
-    {
-      sv.listen(); //Start listening for connections
-    } 
-    catch (Exception ex) 
-    {
-      System.out.println("ERROR - Could not listen for clients!");
-    }
-  }
+  
 }
 //End of EchoServer class

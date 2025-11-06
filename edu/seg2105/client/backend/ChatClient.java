@@ -66,33 +66,103 @@ public class ChatClient extends AbstractClient
    * This method handles all data coming from the UI            
    *
    * @param message The message from the UI.    
+ * @throws IOException 
    */
-  public void handleMessageFromClientUI(String message)
+  public void handleMessageFromClientUI(String message) throws IOException
   {
-    try
-    {
-      sendToServer(message);
+    
+	// Check if the message is a command
+	if (message.startsWith("#")) {
+		// this is a command
+		switch(message.split(" ")[0]) {
+		case "#quit":
+			quit();
+			break;
+		case "#logoff":
+			if (this.isConnected()) {
+			      closeConnection();					
+			} else {
+				clientUI.display("Already logged off.");
+			}
+			break;
+			
+		case "#login":
+			if (! this.isConnected()) {
+			      openConnection();					
+			} else {
+				clientUI.display("Already logged in.");
+			}
+			break;
+			
+		case "#gethost":
+			clientUI.display(this.getHost());
+			break;
+			
+		case "#getport":
+			clientUI.display(String.valueOf(this.getPort()));
+			break;
+			
+		case "#setport":
+			if (! this.isConnected()) {
+				try {
+					this.setPort(Integer.parseInt(message.split(" ")[1]));
+					clientUI.display("Port set to " + this.getPort());
+				}
+				catch (IndexOutOfBoundsException e) {
+					clientUI.display("Port number needed.");
+				}				
+			} else {
+				clientUI.display("Cannot change port when logged in.");
+			}
+			break;
+			
+		case "#sethost":
+						
+			if (! this.isConnected()) {
+				try {
+					this.setHost(message.split(" ")[1]);
+					clientUI.display("Hostname set to " + this.getHost());
+				}
+				catch (IndexOutOfBoundsException e) {
+					clientUI.display("Hostname needed.");
+				}				
+			} else {
+				clientUI.display("Cannot change hostname when logged in.");
+			}
+			break;
+			
+		default:
+			clientUI.display("Invalid command.");
+		}
+	} else {  
+		// message is not a command, send it to the server
+		try
+	    {
+	      sendToServer(message);
+	    }
+	    catch(IOException e)
+	    {
+	      clientUI.display
+	        ("Could not send message to server.");
     }
-    catch(IOException e)
-    {
-      clientUI.display
-        ("Could not send message to server.  Terminating client.");
-      quit();
-    }
-  }
-  
-  public void connectionClosed() {
-	  clientUI.display 
-      ("Server disconnected.  Terminating client.");
-	  System.exit(0);
+	}
   }
   
   public void connectionException(Exception exception) {
 	  clientUI.display 
-      ("Server disconnected.  Terminating client.");
-	  System.exit(0);
+      ("Server disconnected.");
 	}
   
+  public void connectionClosed() {
+	  clientUI.display 
+      ("Server disconnected.");
+	}
+  
+  
+  public void connectionEstablished() {
+	  clientUI.display 
+      ("Server connected.");
+  }
   /**
    * This method terminates the client.
    */

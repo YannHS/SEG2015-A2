@@ -18,8 +18,7 @@ import edu.seg2105.client.common.*;
  * @author Dr Timothy C. Lethbridge  
  * @author Dr Robert Lagani&egrave;re
  */
-public class ClientConsole implements ChatIF 
-{
+public class ClientConsole implements ChatIF {
   //Class variables *************************************************
   
   /**
@@ -93,6 +92,8 @@ public class ClientConsole implements ChatIF
     {
       System.out.println
         ("Unexpected error while reading from console!");
+      System.out.println
+      (ex);
     }
   }
 
@@ -114,6 +115,7 @@ public class ClientConsole implements ChatIF
    * This method is responsible for the creation of the Client UI.
    *
    * @param args[0] The host to connect to.
+   * @param args[0] The port to connect on.
    */
   public static void main(String[] args) 
   {
@@ -143,5 +145,7 @@ public class ClientConsole implements ChatIF
     ClientConsole chat= new ClientConsole(host, DEFAULT_PORT);
     chat.accept();  //Wait for console data
   }
+  
+
 }
 //End of ConsoleChat class
