@@ -80,6 +80,7 @@ public class EchoServer extends AbstractServer
 		}
 		catch (IndexOutOfBoundsException e) {
 			try {client.sendToClient("Login id not found"); } catch (IOException e1) {}
+			
 			try{client.close();} catch (Exception f){}
 		}	
     } else if (msgString.startsWith("#login") && client.getInfo("loginID") != null) {
@@ -113,11 +114,12 @@ public class EchoServer extends AbstractServer
       ("Server has stopped listening for connections.");
     
   }
-  
+     
   synchronized protected void clientException(ConnectionToClient client, Throwable exception) {
 	  System.out.println
-      (client.getName() + " has disconnected.");
+      (client.getInfo("loginID") + " has disconnected.");
   }
+  
   
   public void handleMessageFromServerUI(String message) throws IOException {
 	  
@@ -180,6 +182,7 @@ public class EchoServer extends AbstractServer
 	    }
 		}
   }
+  
   
   public void quit()
   {

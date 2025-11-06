@@ -105,7 +105,7 @@ public class ServerConsole implements ChatIF {
 	    
 	    try
 	    {
-	      port = Integer.getInteger(args[1]);
+	      port = Integer.parseInt(args[0]);
 	    }
 	    catch(ArrayIndexOutOfBoundsException e)
 	    {
@@ -113,7 +113,7 @@ public class ServerConsole implements ChatIF {
 	    }
 	    
 	    
-	    ServerConsole chat= new ServerConsole(DEFAULT_PORT);
+	    ServerConsole chat= new ServerConsole(port);
 	    chat.accept();  //Wait for console data
 	  }
 
