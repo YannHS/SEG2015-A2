@@ -76,7 +76,7 @@ public class EchoServer extends AbstractServer
     	// the client is connected for the first time
     	try {
 			client.setInfo("loginID", msgString.split(" ")[1]);
-			serverUI.display(msgString.split(" ")[1] + " logged in.");
+			System.out.println(client.getInfo("loginID") + " has logged on.");
 		}
 		catch (IndexOutOfBoundsException e) {
 			try {client.sendToClient("Login id not found"); } catch (IOException e1) {}
